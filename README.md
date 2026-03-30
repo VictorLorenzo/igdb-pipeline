@@ -6,6 +6,10 @@ Built with **Apache NiFi**, **Apache Airflow**, **Apache Spark + Delta Lake**, *
 
 ---
 
+## Data Diagram
+
+See the full Silver layer Entity Relationship Diagram → [IGDB Silver Layer ERD](IGDB_SILVER_LAYER_ERD.md)
+
 ## Architecture
 
 ```
@@ -82,9 +86,39 @@ Storage: MinIO (S3-compatible)    Catalog: Unity Catalog
 Two NiFi templates handle data extraction from the IGDB API:
 
 - **IGDB_API_Data_Extractor** — Calls IGDB REST endpoints with OAuth authentication, writes JSON responses to the MinIO landing zone (`datalake-landing`)
-- **IGDB_Metadata_Ingestion** — Ingests and converts metadata with Avro/JSON transformation and hash-based deduplication
+- **IGDB_Metadata_Ingestion** — Ingests and converts metadata with JSON transformation and hash-based deduplication
 
-**Requirements**: IGDB API credentials (OAuth Bearer token + Client-ID from [Twitch Developer Portal](https://dev.twitch.tv/))
+**Requirements**: IGDB API credentials (OAuth Bearer token + Client-ID from [IGDB API Documentation](https://api-docs.igdb.com/#getting-started). If you want to use the templates available in this project, you'll need to follow the steps to create an account on IGDB.
+
+**How to run**:
+
+* Access the [Nifi Canvas](http://localhost:8443/nifi/)
+* At the nifi UI, upload your nifi ProcessGroup `./nifi/template/*.json`
+  ![alt text](./assets/nifiTemplateUpdate.png)
+* Drag and drop to chose the uploaded template.
+  ![alt text](./assets/IGDB_API_INGESTION.png)
+* Access the template double clicking at the group
+* Set the parameter by right clicking on a blank space (optional, mostly of the projects already has their own parameters pre selected).
+  ![alt text](./assets/Variables.png)
+  ![alt text](./assets/Variables_set.png)
+* On InvokeHttp, doble click it and create two essential properties (It is recommended to enable the sensitive data option. Don't forget, those credentials you get from https://api-docs.igdb.com/#getting-started.).
+  ![alt text](./assets/Property_InvokeHttp.png)
+  ```
+  Authorization: Bearer "Your Access Token",
+  Client-ID: "Your Client-ID",
+  ```
+
+* Right click on a blank space and chose the "Controller Services" option and enable the controller.
+  ![alt text](./assets/Controller_Sevice_Option.png)
+  ![alt text](./assets/Activate_Controller.png)
+
+* Because you want to run it once for the start dump: Right click at "GenerateFlowFile" and Run once it, then deactivate so it cant run again in the flow
+  ![alt text](./assets/RunOnce.png)
+
+* Left Click on a blank space to select all flow and start the proccess
+  ![alt text](./assets/Start_pipeline_nifi.png)
+* Wait and watch the proccess, you can also see the files beign ingested at your lading-bucket
+  ![alt text](./assets/minio_landing.png)
 
 ### 2. Processing (Airflow + Spark)
 
