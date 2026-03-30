@@ -81,6 +81,10 @@ Storage: MinIO (S3-compatible)    Catalog: Unity Catalog
 
 ## How It Works
 
+### Prerequisites
+
+- You can follow all the steps from data-platform project: https://github.com/VictorLorenzo/data-plataform
+
 ### 1. Ingestion (NiFi)
 
 Two NiFi templates handle data extraction from the IGDB API:
@@ -161,22 +165,3 @@ The pipeline processes **71 IGDB entities** including:
 | Data Catalog | Unity Catalog |
 | Table Format | Delta Lake with UniForm (Iceberg compatibility) |
 | Visualization | Metabase |
-
-## Getting Started
-
-### Prerequisites
-
-- Docker & Docker Compose
-- IGDB API credentials ([register here](https://api-docs.igdb.com/#account-creation))
-- MinIO instance with `datalake` and `datalake-landing` buckets
-
-### Setup
-
-1. **NiFi**: Import the templates from `nifi/template/` and configure your IGDB API credentials and MinIO connection
-2. **Airflow**: Deploy the DAGs and Spark configs — ensure `spark/params/` is mounted at `/opt/airflow/spark/params/`
-3. **Run**: Trigger `dag_igdb_raw_to_silver` first, then `dag_igdb_silver_to_gold`
-4. **Metabase**: Connect to the Gold layer and build your dashboards
-
-## License
-
-MIT
